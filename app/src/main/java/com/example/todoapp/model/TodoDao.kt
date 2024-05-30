@@ -12,7 +12,7 @@ interface TodoDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(vararg todo:Todo)
 
-    @Query("SELECT * FROM todo")
+    @Query("SELECT * FROM todo ORDER BY priority DESC")
     fun selectAllTodo():List<Todo>
 
     @Query("SELECT * FROM todo WHERE uuid = :id")

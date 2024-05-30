@@ -5,14 +5,17 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RadioButton
+import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.todoapp.R
 import com.example.todoapp.databinding.FragmentCreateTodoBinding
+import com.example.todoapp.databinding.FragmentEditTodoBinding
 import com.example.todoapp.viewmodel.DetailTodoViewModel
 
-class EditTodoFragment : Fragment() {
-    private lateinit var binding:FragmentCreateTodoBinding
+class EditTodoFragment : Fragment(), RadioClickListener, TodoEditClickListener {
+    private lateinit var binding: FragmentEditTodoBinding
     private lateinit var viewModel:DetailTodoViewModel
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -23,19 +26,15 @@ class EditTodoFragment : Fragment() {
         val uuid = EditTodoFragmentArgs.fromBundle(requireArguments()).uuid
         viewModel.fetch(uuid)
 
+        binding.submitlistener = this
+        binding.radiolistener = this
+
         observeViewModel()
     }
 
     fun observeViewModel() {
         viewModel.todoLD.observe(viewLifecycleOwner, Observer {
-            binding.txtTitle.setText(it.title)
-            binding.txtNotes.setText(it.notes)
-
-            when(it.priority) {
-                1 -> binding.radioLow.isChecked = true
-                2 -> binding.radioMedium.isChecked = true
-                else -> binding.radioHigh.isChecked = true
-            }
+            binding.todo = it
         })
     }
 
@@ -43,8 +42,17 @@ class EditTodoFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentCreateTodoBinding.inflate(inflater, container, false)
+        binding = FragmentEditTodoBinding.inflate(inflater, container, false)
         return binding.root
+    }
+
+    override fun onRadioClick(v: View) {
+        binding.todo!!.priority = v.tag.toString().toInt()
+    }
+
+    override fun onTodoEditClick(v: View) {
+        viewModel.updateTodo(binding.todo!!)
+        Toast.makeText(context, "Todo Update", Toast.LENGTH_SHORT).show()
     }
 
 }
